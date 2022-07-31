@@ -1,0 +1,97 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: pihole-backup
+  namespace: {{ pihole_ns }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: {{ pihole_ns }}
+  name: pihole-backup
+rules:
+- apiGroups: ["", "apps", "batch", "networking.k8s.io"]
+  resources: ["*"]
+  verbs: ["*"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: pihole-backup
+  namespace: {{ pihole_ns }}
+subjects:
+- kind: ServiceAccount
+  name: pihole-backup
+  namespace: {{ pihole_ns }}
+roleRef:
+  kind: Role
+  name: pihole-backup
+  apiGroup: ""
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: gdrive-serviceaccount
+  namespace: {{ pihole_ns }}
+data:
+  gdrive-serviceaccount.json: {{ gdrive_serviceaccount }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pihole-download-backup
+  namespace: {{ pihole_ns }}
+spec:
+  backoffLimit: 10
+  template:
+    spec:
+      serviceAccountName: pihole-backup
+      restartPolicy: Never
+      containers:
+      - name: pihole
+        image: jdmcdonagh/pihole-download-backup:latest
+        volumeMounts:
+        - mountPath: /etc/pihole
+          name: config
+        - mountPath: /etc/secrets
+          name: gdrive-secret
+          readOnly: true
+      volumes:
+      - name: config
+        persistentVolumeClaim:
+          claimName: pihole
+      - name: gdrive-secret
+        secret:
+          secretName: gdrive-serviceaccount
+          optional: false
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: pihole-backup
+  namespace: {{ pihole_ns }}
+spec:
+  schedule: {{ pihole_backup_cron }}
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: pihole-backup
+          restartPolicy: OnFailure
+          containers:
+          - name: pihole-backup
+            image: jdmcdonagh/pihole-upload-backup:latest 
+            volumeMounts:
+            - mountPath: /etc/pihole
+              name: config
+            - mountPath: /etc/secrets
+              name: gdrive-secret
+              readOnly: true
+          volumes:
+          - name: config
+            persistentVolumeClaim:
+              claimName: pihole
+          - name: gdrive-secret
+            secret:
+              secretName: gdrive-serviceaccount
+              optional: false

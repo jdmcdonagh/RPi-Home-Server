@@ -1,0 +1,12 @@
+---
+
+- name: Destroy cluster
+  hosts: all
+  become: yes
+  roles:
+    - { role: destroy, tags: destroy }
+
+  tasks:
+  - name: Destroy complete
+    debug:
+      msg: "RPi Home Server has been destroyed!"

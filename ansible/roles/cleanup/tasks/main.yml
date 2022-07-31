@@ -1,0 +1,6 @@
+---
+
+  - name: Delete build directory
+    file:
+      path: /build
+      state: absent

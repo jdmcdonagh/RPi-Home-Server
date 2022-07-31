@@ -1,0 +1,24 @@
+---
+
+- name: Create cluster
+  hosts: all
+  become: yes
+  roles:
+    - { role: prepare, tags: prepare }
+    - { role: K3s, tags: K3s }
+    - { role: pihole, tags: pihole }
+    - { role: cleanup, tags: cleanup }
+  environment:
+    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+
+  vars_prompt:
+    - name: pihole_pwd
+      prompt: Set pihole dashboard password
+      default: "default"
+      private: yes
+      confirm: yes
+
+  tasks:
+  - name: Create complete
+    debug:
+      msg: "RPi Home Server is Ready!"

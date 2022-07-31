@@ -1,0 +1,39 @@
+---
+
+- name: Application server specific playbook
+  hosts: all
+  become: yes
+  roles:
+    - { role: setup, tags: setup }
+
+  vars_prompt:
+    - name: "hostname"
+      prompt: "Hostname"
+      default: rpi-alpha
+      private: no
+    - name: "username"
+      prompt: "Username"
+      default: james
+      private: no
+    - name: "password"
+      prompt: "Password"
+      default: default
+      private: yes
+      encrypt: "sha512_crypt"
+      confirm: yes
+    - name: "interface"
+      prompt: "Ethernet interface"
+      default: "eth0"
+      private: no
+    - name: "ipaddress"
+      prompt: "Static IPv4 address"
+      default: 192.168.1.10
+      private: no
+    - name: "routers"
+      prompt: "Routers (comma separated)"
+      default: 192.168.1.1
+      private: no
+    - name: "dns_servers"
+      prompt: "DNS servers (space separated)"
+      default: "8.8.8.8 1.1.1.1"
+      private: no

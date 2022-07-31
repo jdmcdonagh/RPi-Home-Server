@@ -1,0 +1,6 @@
+---
+
+  - name: Create build directory
+    file:
+      path: /build
+      state: directory

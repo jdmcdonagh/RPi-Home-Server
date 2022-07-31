@@ -1,0 +1,60 @@
+---
+
+  - name: Set the hostname
+    command: hostnamectl set-hostname "{{ hostname }}"
+
+  - name: Update /etc/hosts with new hostname
+    lineinfile:
+      dest: /etc/hosts
+      regexp: "^127.0.1.1\traspberrypi$"
+      line: "127.0.1.1\t{{ hostname }}"
+      state: present
+
+  - name: Create a (non default) user account
+    user:
+      name: "{{ username }}"
+      shell: /bin/bash
+      createhome: yes
+      comment: "User Account"
+      groups: adm,dialout,cdrom,sudo,audio,video,plugdev,games,users,input,netdev,gpio,i2c,spi
+      password: "{{ password }}"
+
+  - name: Deploy user's SSH key
+    authorized_key:
+      user: "{{ username }}"
+      key: "{{ lookup('file', '~/.ssh/rpi.pub') }}"
+
+  - name: Disable SSH password authentication
+    lineinfile:
+      dest: /etc/ssh/sshd_config
+      regexp: "^PasswordAuthentication"
+      line: "PasswordAuthentication no"
+      state: present
+    notify: reboot
+
+  - name: Configure static IP in  /etc/dhcpcd.conf
+    lineinfile:
+      dest:  /etc/dhcpcd.conf
+      regexp: "{{ item.regexp }}"
+      line: "{{ item.line }}"
+      state: present
+    with_items:
+      - { regexp: "^interface eth[0-9]$", line: "interface {{ interface }}" }
+      - { regexp: "^static ip_address", line: "static ip_address={{ ipaddress }}" }
+      - { regexp: "^static routers", line: "static routers={{ routers }}" }
+      - { regexp: "^static domain_name_servers", line: "static domain_name_servers={{ dns_servers }}" }
+    notify: reboot
+
+  - name: Expand filesystem to fill disk
+    command: raspi-config --expand-rootfs
+    notify:
+      - reboot
+
+  - name: Update and upgrade apt packages
+    apt:
+      upgrade: "yes"
+      update_cache: yes
+      cache_valid_time: 86400
+
+  - name: Install pip3
+    apt: name=python3-pip state=present 

@@ -1,0 +1,10 @@
+---
+hostname: rpi-alpha
+
+metallb_ns: metallb
+
+pihole_ns: pihole
+pihole_pvc_size: 500Mi
+pihole_ip: 192.168.1.10
+pihole_ip_pool: "{{ pihole_ip + '-' + pihole_ip }}"
+pihole_backup_cron: "0 3 * * 0" # 03:00 on Sunday

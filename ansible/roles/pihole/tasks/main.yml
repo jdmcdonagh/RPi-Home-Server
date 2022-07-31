@@ -1,0 +1,44 @@
+---
+
+  - name: Create pihole build directory
+    file:
+      path: /build/pihole
+      state: directory
+
+  - name: Add pihole helm repository
+    kubernetes.core.helm_repository:
+      name: pihole
+      repo_url: https://mojo2600.github.io/pihole-kubernetes
+
+  - name: Deploy pihole chart
+    kubernetes.core.helm:
+      name: pihole
+      chart_ref: pihole/pihole
+      release_namespace: pihole
+      create_namespace: true
+      values:
+        adminPassword: "{{ pihole_pwd }}"
+        persistentVolumeClaim:
+          enabled: true
+        serviceWeb:
+          loadBalancerIP: "{{ pihole_ip }}"
+          annotations:
+            metallb.universe.tf/allow-shared-ip: pihole-svc
+          type: LoadBalancer
+        serviceDns:
+          loadBalancerIP: "{{ pihole_ip }}"
+          annotations:
+            metallb.universe.tf/allow-shared-ip: pihole-svc
+          type: LoadBalancer
+
+  - name: Copy manifest files to target
+    template:
+      src: "{{ item }}"
+      dest: /build/pihole/
+    with_fileglob:
+    - "templates/*.yml.j2"
+    vars:
+      gdrive_serviceaccount: "{{ lookup('template','files/gdrive-serviceaccount.json') | string | regex_replace('[\\r\\n\\t]+','') | b64encode }}"
+
+  - name: Apply pihole backup manifests
+    command: kubectl apply -f /build/pihole/pihole-backup.yml.j2

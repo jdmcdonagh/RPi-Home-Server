@@ -1,0 +1,14 @@
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: pihole-ip-pool
+  namespace: {{ metallb_ns }}
+spec:
+  addresses:
+  - {{ pihole_ip_pool }}
+---
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: layer2-advertisement
+  namespace: {{ metallb_ns }}
