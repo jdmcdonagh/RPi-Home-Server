@@ -1,0 +1,18 @@
+---
+
+  - name: Create rss build directory
+    file:
+      path: /build/rss
+      state: directory
+
+  - name: Copy manifest files to target
+    template:
+      src: "{{ item }}"
+      dest: /build/rss/
+    with_fileglob:
+    - "templates/*.yml.j2"
+    vars:
+      rss_config: "{{ lookup('template','files/config.yml') | from_yaml }}"
+
+  - name: Apply rss backup manifests
+    command: kubectl apply -f /build/rss/rss-tracker.yml.j2

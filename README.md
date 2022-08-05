@@ -14,6 +14,7 @@ Run `./destroy.sh` to uninstall the cluster.
 ## Applications
 
 - [Pi-hole](https://pi-hole.net) - advertising-aware DNS/web server.
+- RSS Tracker - email notifications for rss feed updates.
 
 ### Extras
 

@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: rss-tracker
+  namespace: {{ rss_ns }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: rss-tracker-secret
+  namespace: {{ rss_ns }}
+type: Opaque
+stringData:
+  {{ rss_config }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rss-tracker-deployment
+  namespace: {{ rss_ns }}
+  labels:
+    app: rss
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rss
+  template:
+    metadata:
+      name: rss-tracker
+      namespace: {{ rss_ns }}
+      labels:
+        app: rss
+    spec:
+      containers:
+      - name: rss
+        image: jdmcdonagh/rss-tracker:latest
+        envFrom:
+        - secretRef:
+            name: rss-tracker-secret

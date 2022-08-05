@@ -3,6 +3,7 @@
 containers=(
   "pihole-download-backup"
   "pihole-upload-backup"
+  "rss-tracker"
 )
 
 for c in "${containers[@]}"; do

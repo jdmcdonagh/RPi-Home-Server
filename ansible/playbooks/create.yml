@@ -7,6 +7,7 @@
     - { role: prepare, tags: prepare }
     - { role: K3s, tags: K3s }
     - { role: pihole, tags: pihole }
+    - { role: rss, tags: rss }
     - { role: cleanup, tags: cleanup }
   environment:
     KUBECONFIG: /etc/rancher/k3s/k3s.yaml
