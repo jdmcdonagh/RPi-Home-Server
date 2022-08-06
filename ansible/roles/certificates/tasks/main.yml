@@ -1,0 +1,44 @@
+---
+
+  - name: Create certificates build directory
+    file:
+      path: /build/certificates
+      state: directory
+
+  - name: Apply cert-manager custom resource definitions
+    command: kubectl apply --validate=false -f https://github.com/cert-manager/cert-manager/releases/download/v1.9.1/cert-manager.crds.yaml
+
+  - name: Add jetstack helm repository
+    kubernetes.core.helm_repository:
+      name: jetstack
+      repo_url: https://charts.jetstack.io
+
+  - name: Deploy cert-manager chart
+    kubernetes.core.helm:
+      name: cert-manager
+      chart_ref: jetstack/cert-manager
+      release_namespace: "{{ certificate_ns }}"
+      create_namespace: yes
+      wait: yes
+
+  - debug:
+      msg: "{{ cloudflare_api_token }}" 
+    vars:
+      cloudflare_api_token: "{{ lookup('template','files/cloudflare-api-token.txt') | b64encode }}"
+
+  - name: Copy manifest files to target
+    template:
+      src: "{{ item }}"
+      dest: /build/certificates/
+    with_fileglob:
+    - "templates/*.yml.j2"
+    vars:
+      cloudflare_api_token: "{{ lookup('template','files/cloudflare-api-token.txt') | b64encode }}"
+      cloudflare_email: "{{ lookup('template','files/cloudflare-email.txt') }}"
+
+  - name: Apply cluster issuer manifests
+    command: kubectl apply -f /build/certificates/issuer.yml.j2
+    retries: 3
+    delay: 10
+    register: result
+    until: result is not failed

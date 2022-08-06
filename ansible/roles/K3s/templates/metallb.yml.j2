@@ -1,11 +1,11 @@
 apiVersion: metallb.io/v1beta1
 kind: IPAddressPool
 metadata:
-  name: pihole-ip-pool
+  name: default
   namespace: {{ metallb_ns }}
 spec:
   addresses:
-  - {{ pihole_ip_pool }}
+  - {{ default_ip_pool }}
 ---
 apiVersion: metallb.io/v1beta1
 kind: L2Advertisement

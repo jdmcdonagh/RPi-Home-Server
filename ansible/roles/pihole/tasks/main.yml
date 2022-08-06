@@ -18,18 +18,21 @@
       create_namespace: true
       values:
         adminPassword: "{{ pihole_pwd }}"
+        dnsmasq:
+          customDnsEntries:
+            - address=/nas/192.168.178.10
+            - address=/test/192.168.178.10
+          customCnameEntries:
+            - cname=foo.nas,nas
         persistentVolumeClaim:
           enabled: true
-        serviceWeb:
-          loadBalancerIP: "{{ pihole_ip }}"
-          annotations:
-            metallb.universe.tf/allow-shared-ip: pihole-svc
-          type: LoadBalancer
         serviceDns:
           loadBalancerIP: "{{ pihole_ip }}"
+          type: LoadBalancer
           annotations:
             metallb.universe.tf/allow-shared-ip: pihole-svc
-          type: LoadBalancer
+        extraEnvVars:
+          TZ: "{{ pihole_timezone }}"
 
   - name: Copy manifest files to target
     template:
@@ -40,5 +43,16 @@
     vars:
       gdrive_serviceaccount: "{{ lookup('template','files/gdrive-serviceaccount.json') | string | regex_replace('[\\r\\n\\t]+','') | b64encode }}"
 
-  - name: Apply pihole backup manifests
+  - name: Apply pihole ingress manifest
+    command: kubectl apply -f /build/pihole/pihole-ingress.yml.j2
+    retries: 3
+    delay: 10
+    register: result
+    until: result is not failed
+
+  - name: Apply pihole backup manifest
     command: kubectl apply -f /build/pihole/pihole-backup.yml.j2
+    retries: 3
+    delay: 10
+    register: result
+    until: result is not failed

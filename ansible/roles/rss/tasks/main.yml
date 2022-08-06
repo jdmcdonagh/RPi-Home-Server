@@ -14,5 +14,9 @@
     vars:
       rss_config: "{{ lookup('template','files/config.yml') | from_yaml }}"
 
-  - name: Apply rss backup manifests
+  - name: Apply rss tracker manifests
     command: kubectl apply -f /build/rss/rss-tracker.yml.j2
+    retries: 3
+    delay: 10
+    register: result
+    until: result is not failed

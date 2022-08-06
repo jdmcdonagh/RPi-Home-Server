@@ -65,3 +65,21 @@
     command: kubectl apply -f /build/K3s/metallb.yml.j2
     retries: 3
     delay: 10
+    register: result
+    until: result is not failed
+
+  - name: Add nginx ingress helm repository
+    kubernetes.core.helm_repository:
+      name: ingress-nginx
+      repo_url: https://kubernetes.github.io/ingress-nginx
+
+  - name: Deploy nginx ingress chart
+    kubernetes.core.helm:
+      name: ingress-nginx
+      chart_ref: ingress-nginx/ingress-nginx
+      release_namespace: "{{ nginx_ns }}"
+      create_namespace: yes
+      wait: yes
+      values:
+        defaultBackend:
+          enabled: false

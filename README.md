@@ -15,6 +15,7 @@ Run `./destroy.sh` to uninstall the cluster.
 
 - [Pi-hole](https://pi-hole.net) - advertising-aware DNS/web server.
 - RSS Tracker - email notifications for rss feed updates.
+- Grafana Dashboard - displaying prometheus monitoring information.
 
 ### Extras
 
@@ -25,3 +26,20 @@ Run `./destroy.sh` to uninstall the cluster.
 - [Home Assistant](https://www.home-assistant.io/) - centralise home IoT devices from multiple providers.
 - [OctoPrint](https://octoprint.org) - remote dashboard for 3D printers.
 - [Bitwarden](https://bitwarden.com) - open source password manager.
+
+## Other Setup Steps
+
+### Tokens
+
+- Google Drive Service Account Token - used for pihole backup jobs
+- Cloudflare DNS API Token - used for cert-manager challenge
+
+### DNS Setup
+
+- A Record - dashboard - <nginx-ingress-external-ip> - DNS only (no cloudflare proxy)
+- A Record - pihole - <nginx-ingress-external-ip> - DNS only (no cloudflare proxy)
+
+### Ingress
+
+- First metallb ip pool address - Nginx ingress
+- Second metallb ip pool address - Pihole DNS ingress

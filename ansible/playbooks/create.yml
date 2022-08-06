@@ -6,7 +6,10 @@
   roles:
     - { role: prepare, tags: prepare }
     - { role: K3s, tags: K3s }
+    - { role: certificates, tags: certificates }
+    - { role: dashboard, tags: dashboard }
     - { role: pihole, tags: pihole }
+    # - { role: monitor, tags: monitor }
     - { role: rss, tags: rss }
     - { role: cleanup, tags: cleanup }
   environment:
@@ -20,6 +23,10 @@
       confirm: yes
 
   tasks:
+  - name: Kubernetes dashboard admin token
+    debug:
+      msg: "{{ dashboard_token.stdout }}"
+
   - name: Create complete
     debug:
       msg: "RPi Home Server is Ready!"

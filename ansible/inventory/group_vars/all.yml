@@ -1,12 +1,26 @@
 ---
 hostname: rpi-alpha
 
+domain: jmcdonagh.com
+
 metallb_ns: metallb
+default_ip_pool: 192.168.1.20-192.168.1.30
+nginx_ns: ingress-nginx
+
+certificate_ns: certificates
+issuer_name: letsencrypt
+
+dashboard_ns: dashboard
+dashboard_subdomain: dashboard
+dashboard_admin_name: james
+
+monitoring_ns: monitor
 
 pihole_ns: pihole
 pihole_pvc_size: 500Mi
-pihole_ip: 192.168.1.10
-pihole_ip_pool: "{{ pihole_ip + '-' + pihole_ip }}"
+pihole_ip: 192.168.1.21
+pihole_subdomain: pihole
+pihole_timezone: Europe/London
 pihole_backup_cron: "0 3 * * 0" # 03:00 on Sunday
 
 rss_ns: rss-tracker

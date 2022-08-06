@@ -1,0 +1,44 @@
+---
+
+  - name: Create dashboard build directory
+    file:
+      path: /build/dashboard
+      state: directory
+
+  - name: Add kubernetes-dashboard helm repository
+    kubernetes.core.helm_repository:
+      name: kubernetes-dashboard
+      repo_url: https://kubernetes.github.io/dashboard/
+
+  - name: Deploy kubernetes-dashboard chart
+    kubernetes.core.helm:
+      name: kubernetes-dashboard
+      chart_ref: kubernetes-dashboard/kubernetes-dashboard
+      release_namespace: "{{ dashboard_ns }}"
+      create_namespace: yes
+      wait: yes
+
+  - name: Copy manifest files to target
+    template:
+      src: "{{ item }}"
+      dest: /build/dashboard/
+    with_fileglob:
+    - "templates/*.yml.j2"
+
+  - name: Apply dashboard service account manifests
+    command: kubectl apply -f /build/dashboard/serviceaccount.yml.j2
+    retries: 3
+    delay: 10
+    register: result
+    until: result is not failed
+
+  - name: Apply dashboard ingress manifests
+    command: kubectl apply -f /build/dashboard/ingress.yml.j2
+    retries: 3
+    delay: 10
+    register: result
+    until: result is not failed
+
+  - name: Grab admin access token
+    command: kubectl -n {{ dashboard_ns }} create token "{{ dashboard_admin_name }}"
+    register: dashboard_token

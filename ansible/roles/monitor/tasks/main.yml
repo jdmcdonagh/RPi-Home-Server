@@ -1,0 +1,86 @@
+---
+
+  - name: Create monitor build directory
+    file:
+      path: /build/monitor
+      state: directory
+
+  # - name: Install go and git
+  #   apt:
+  #     pkg:
+  #     - golang-go
+  #     - git
+
+  # - name: Add go to system path
+  #   shell: "export PATH=$PATH:$(go env GOPATH)/bin; export GOPATH=$(go env GOPATH)"
+
+  # - name: Checkout cluster monitoring repository
+  #   git:
+  #     repo: 'https://github.com/carlosedp/cluster-monitoring.git'
+  #     dest: /build/monitor
+  #     force: yes
+
+  # - name: Copy configuration to target
+  #   template:
+  #     src: templates/config.jsonnet.j2
+  #     dest: /build/monitor/vars.jsonnet
+
+  # - name: Install monitoring
+  #   shell:
+  #     cmd: make vendor; make deploy
+  #     chdir: /build/monitor
+
+  - name: Add prometheus helm repository
+    kubernetes.core.helm_repository:
+      name: prometheus
+      repo_url: https://prometheus-community.github.io/helm-charts
+
+  - name: Deploy kube-prometheus-stack chart
+    kubernetes.core.helm:
+      name: kube-prometheus-stack
+      chart_ref: prometheus/kube-prometheus-stack
+      release_namespace: "{{ monitoring_ns }}"
+      create_namespace: yes
+      wait: yes
+      values:
+        alertmanager:
+          ingress:
+            enabled: true
+            ingressClassName: nginx
+            hosts:
+            - alertmanager.192.168.1.20.nip.io
+            paths:
+            - /
+            pathType: Prefix
+        grafana:
+          ingress:
+            enabled: true
+            ingressClassName: nginx
+            hosts:
+            - grafana.192.168.1.20.nip.io
+            paths:
+            - /
+            pathType: Prefix
+        prometheus:
+          ingress:
+            enabled: true
+            ingressClassName: nginx
+            hosts:
+            - prometheus.192.168.1.20.nip.io
+            paths:
+            - /
+            pathType: Prefix
+
+  # - name: Copy manifest files to target
+  #   template:
+  #     src: "{{ item }}"
+  #     dest: /build/monitor/
+  #   with_fileglob:
+  #   - "templates/*.yml.j2"
+
+  # - name: Apply dashboard service account manifests
+  #   command: kubectl apply -f /build/monitor/issuer.yml.j2
+  #   retries: 3
+  #   delay: 10
+  #   register: result
+  #   until: result is not failed
