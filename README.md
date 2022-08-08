@@ -36,8 +36,8 @@ Run `./destroy.sh` to uninstall the cluster.
 
 ### DNS Setup
 
-- A Record - dashboard - <nginx-ingress-external-ip> - DNS only (no cloudflare proxy)
-- A Record - pihole - <nginx-ingress-external-ip> - DNS only (no cloudflare proxy)
+- A Record - dashboard - `nginx-ingress-external-ip` - DNS only (no cloudflare proxy)
+- A Record - pihole - `nginx-ingress-external-ip` - DNS only (no cloudflare proxy)
 
 ### Ingress
 
