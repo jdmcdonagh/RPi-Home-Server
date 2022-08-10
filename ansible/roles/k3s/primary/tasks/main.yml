@@ -1,0 +1,40 @@
+---
+
+  - name: Check if K3s is already installed
+    stat:
+      path: /usr/local/bin/k3s
+    register: k3s_installed
+
+  - name: Install K3s
+    shell: curl -sfL https://get.k3s.io | sh -
+    environment:
+      INSTALL_K3S_EXEC: "--no-deploy traefik,servicelb"
+    when: not k3s_installed.stat.exists
+
+  - name: Wait for node-token
+    wait_for:
+      path: /var/lib/rancher/k3s/server/node-token
+
+  - name: Register node-token file access mode
+    stat:
+      path: /var/lib/rancher/k3s/server
+    register: p
+
+  - name: Change file access node-token
+    file:
+      path: /var/lib/rancher/k3s/server
+      mode: "g+rx,o+rx"
+
+  - name: Read node-token from primary
+    slurp:
+      src: /var/lib/rancher/k3s/server/node-token
+    register: node_token
+
+  - name: Store primary node-token
+    set_fact:
+      token: "{{ node_token.content | b64decode | regex_replace('\n', '') }}"
+
+  - name: Restore node-token file access
+    file:
+      path: /var/lib/rancher/k3s/server
+      mode: "{{ p.stat.mode }}"

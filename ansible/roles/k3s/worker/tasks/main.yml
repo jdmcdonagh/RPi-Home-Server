@@ -1,0 +1,13 @@
+---
+
+  - name: Check if K3s is already installed
+    stat:
+      path: /usr/local/bin/k3s
+    register: k3s_installed
+
+  - name: Install K3s
+    shell: curl -sfL https://get.k3s.io | sh -
+    environment:
+      K3S_URL: "https://{{ primary_ip }}:6443"
+      K3S_TOKEN: "{{ hostvars[groups['primary'][0]]['token'] }}"
+    when: not k3s_installed.stat.exists
