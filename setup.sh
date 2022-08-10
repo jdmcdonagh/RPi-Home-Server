@@ -2,12 +2,12 @@
 
 set -e
 
-sudo apt update -y
+# sudo apt update -y
 
 sudo apt install sshpass -y
 sudo apt install ansible -y
 
-ssh-keygen -b 4096 -t rsa -f ~/.ssh/rpi -N "" <<< y
+ssh-keygen -b 4096 -t rsa -f ~/.ssh/rpi -N "" <<< n || true | printf "\n"
 
 read -p "Enter Raspberry Pis initial IP address: " IP_ADDRESS
 

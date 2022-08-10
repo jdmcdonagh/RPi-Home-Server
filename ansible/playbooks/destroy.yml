@@ -1,10 +1,16 @@
 ---
 
-- name: Destroy cluster
-  hosts: all
+- name: Destroy primary node
+  hosts: primary
   become: yes
   roles:
-    - { role: destroy, tags: destroy }
+    - { role: destroy/primary, tags: destroy-primary }
+
+- name: Destroy worker nodes
+  hosts: worker
+  become: yes
+  roles:
+    - { role: destroy/worker, tags: destroy-worker }
 
   tasks:
   - name: Destroy complete

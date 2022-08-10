@@ -26,14 +26,14 @@
     - "templates/*.yml.j2"
 
   - name: Apply dashboard service account manifests
-    command: kubectl apply -f /build/dashboard/serviceaccount.yml.j2
+    command: kubectl apply -f /build/dashboard/dashboard-sa.yml.j2
     retries: 3
     delay: 10
     register: result
     until: result is not failed
 
   - name: Apply dashboard ingress manifests
-    command: kubectl apply -f /build/dashboard/ingress.yml.j2
+    command: kubectl apply -f /build/dashboard/dashboard-ingress.yml.j2
     retries: 3
     delay: 10
     register: result

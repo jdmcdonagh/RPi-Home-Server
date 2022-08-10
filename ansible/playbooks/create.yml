@@ -1,15 +1,34 @@
 ---
 
-- name: Create cluster
-  hosts: all
+- name: Prepare pis
+  hosts: cluster
   become: yes
   roles:
     - { role: prepare, tags: prepare }
-    - { role: K3s, tags: K3s }
+
+- name: Build primary node
+  hosts: primary
+  become: yes
+  roles:
+    - { role: k3s/primary, tags: k3s-primary }
+
+- name: Build worker nodes
+  hosts: worker
+  become: yes
+  roles:
+    - { role: k3s/worker, tags: k3s-worker }
+  
+- name: Setup cluster
+  hosts: primary
+  become: yes
+  roles:
+    - { role: metallb, tags: metallb }
+    - { role: ingress-nginx, tags: ingress-nginx }
     - { role: certificates, tags: certificates }
     - { role: dashboard, tags: dashboard }
     - { role: pihole, tags: pihole }
-    # - { role: monitor, tags: monitor }
+    - { role: monitor, tags: monitor }
+    - { role: cloud, tags: cloud }
     - { role: rss, tags: rss }
     - { role: cleanup, tags: cleanup }
   environment:

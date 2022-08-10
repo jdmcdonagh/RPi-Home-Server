@@ -1,0 +1,4 @@
+---
+
+  - name: uninstall worker k3s
+    command: /usr/local/bin/k3s-agent-uninstall.sh

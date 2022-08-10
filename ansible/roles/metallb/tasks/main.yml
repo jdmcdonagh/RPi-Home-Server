@@ -1,0 +1,37 @@
+---
+
+  - name: Create metallb build directory
+    file:
+      path: /build/metallb
+      state: directory
+
+  - name: Install required python modules
+    pip:
+      name: openshift
+
+  - name: Add metallb helm repository
+    kubernetes.core.helm_repository:
+      name: metallb
+      repo_url: https://metallb.github.io/metallb
+
+  - name: Deploy metallb chart
+    kubernetes.core.helm:
+      name: metallb
+      chart_ref: metallb/metallb
+      release_namespace: "{{ metallb_ns }}"
+      create_namespace: yes
+      wait: yes
+
+  - name: Copy manifest files to target
+    template:
+      src: "{{ item }}"
+      dest: /build/metallb/
+    with_fileglob:
+    - "templates/*.yml.j2"
+
+  - name: Apply metallb manifests
+    command: kubectl apply -f /build/metallb/metallb.yml.j2
+    retries: 3
+    delay: 10
+    register: result
+    until: result is not failed

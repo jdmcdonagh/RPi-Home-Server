@@ -21,11 +21,6 @@
       create_namespace: yes
       wait: yes
 
-  - debug:
-      msg: "{{ cloudflare_api_token }}" 
-    vars:
-      cloudflare_api_token: "{{ lookup('template','files/cloudflare-api-token.txt') | b64encode }}"
-
   - name: Copy manifest files to target
     template:
       src: "{{ item }}"

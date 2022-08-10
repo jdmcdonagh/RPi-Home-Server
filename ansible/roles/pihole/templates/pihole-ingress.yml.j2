@@ -9,9 +9,9 @@ metadata:
 spec:
   ingressClassName: nginx
   tls:
-  - hosts:
+  - secretName: {{ issuer_name }}-tls
+    hosts:
     - {{ pihole_subdomain }}.{{ domain }}
-    secretName: {{ issuer_name }}-tls
   rules:
   - host: {{ pihole_subdomain }}.{{ domain }}
     http:

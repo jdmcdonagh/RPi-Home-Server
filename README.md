@@ -15,7 +15,8 @@ Run `./destroy.sh` to uninstall the cluster.
 
 - [Pi-hole](https://pi-hole.net) - advertising-aware DNS/web server.
 - RSS Tracker - email notifications for rss feed updates.
-- Grafana Dashboard - displaying prometheus monitoring information.
+- [Prometheus Stack](https://prometheus.io) - enable alerts and cluster visualisation on grafana.
+- [NextCloud](https://nextcloud.com) - self-hosted cloud storage.
 
 ### Extras
 
@@ -38,6 +39,10 @@ Run `./destroy.sh` to uninstall the cluster.
 
 - A Record - dashboard - `nginx-ingress-external-ip` - DNS only (no cloudflare proxy)
 - A Record - pihole - `nginx-ingress-external-ip` - DNS only (no cloudflare proxy)
+- A Record - prometheus - `nginx-ingress-external-ip` - DNS only (no cloudflare proxy)
+- A Record - alertmanager - `nginx-ingress-external-ip` - DNS only (no cloudflare proxy)
+- A Record - grafana - `nginx-ingress-external-ip` - DNS only (no cloudflare proxy)
+- A Record - cloud - `nginx-ingress-external-ip` - DNS only (no cloudflare proxy)
 
 ### Ingress
 

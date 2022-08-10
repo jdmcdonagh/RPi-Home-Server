@@ -1,35 +1,5 @@
 ---
 
-  - name: Create monitor build directory
-    file:
-      path: /build/monitor
-      state: directory
-
-  # - name: Install go and git
-  #   apt:
-  #     pkg:
-  #     - golang-go
-  #     - git
-
-  # - name: Add go to system path
-  #   shell: "export PATH=$PATH:$(go env GOPATH)/bin; export GOPATH=$(go env GOPATH)"
-
-  # - name: Checkout cluster monitoring repository
-  #   git:
-  #     repo: 'https://github.com/carlosedp/cluster-monitoring.git'
-  #     dest: /build/monitor
-  #     force: yes
-
-  # - name: Copy configuration to target
-  #   template:
-  #     src: templates/config.jsonnet.j2
-  #     dest: /build/monitor/vars.jsonnet
-
-  # - name: Install monitoring
-  #   shell:
-  #     cmd: make vendor; make deploy
-  #     chdir: /build/monitor
-
   - name: Add prometheus helm repository
     kubernetes.core.helm_repository:
       name: prometheus
@@ -46,41 +16,45 @@
         alertmanager:
           ingress:
             enabled: true
+            annotations:
+              cert-manager.io/cluster-issuer: "{{ issuer_name }}"
             ingressClassName: nginx
+            tls:
+            - secretName: "{{ issuer_name }}-tls"
+              hosts:
+              - "{{ alertmanager_subdomain }}.{{ domain }}"
             hosts:
-            - alertmanager.192.168.1.20.nip.io
+            - "{{ alertmanager_subdomain }}.{{ domain }}"
             paths:
             - /
             pathType: Prefix
         grafana:
           ingress:
             enabled: true
+            annotations:
+              cert-manager.io/cluster-issuer: "{{ issuer_name }}"
             ingressClassName: nginx
+            tls:
+            - secretName: "{{ issuer_name }}-tls"
+              hosts:
+              - "{{ grafana_subdomain }}.{{ domain }}"
             hosts:
-            - grafana.192.168.1.20.nip.io
+            - "{{ grafana_subdomain }}.{{ domain }}"
             paths:
             - /
             pathType: Prefix
         prometheus:
           ingress:
             enabled: true
+            annotations:
+              cert-manager.io/cluster-issuer: "{{ issuer_name }}"
             ingressClassName: nginx
+            tls:
+            - secretName: "{{ issuer_name }}-tls"
+              hosts:
+              - "{{ prometheus_subdomain }}.{{ domain }}"
             hosts:
-            - prometheus.192.168.1.20.nip.io
+            - "{{ prometheus_subdomain }}.{{ domain }}"
             paths:
             - /
             pathType: Prefix
-
-  # - name: Copy manifest files to target
-  #   template:
-  #     src: "{{ item }}"
-  #     dest: /build/monitor/
-  #   with_fileglob:
-  #   - "templates/*.yml.j2"
-
-  # - name: Apply dashboard service account manifests
-  #   command: kubectl apply -f /build/monitor/issuer.yml.j2
-  #   retries: 3
-  #   delay: 10
-  #   register: result
-  #   until: result is not failed

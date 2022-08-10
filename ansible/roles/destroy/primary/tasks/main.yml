@@ -1,4 +1,4 @@
 ---
 
-  - name: uninstall K3s
+  - name: uninstall primary k3s
     command: /usr/local/bin/k3s-uninstall.sh

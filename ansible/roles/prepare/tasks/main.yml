@@ -4,3 +4,32 @@
     file:
       path: /build
       state: directory
+
+  - name: Install helm
+    shell: |
+      curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
+      sudo apt-get install apt-transport-https --yes
+      echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
+      sudo apt-get update
+      sudo apt-get install helm
+
+  - name: Check if cgroups are defined in /boot/cmdline.txt
+    lineinfile:
+      path: /boot/cmdline.txt
+      regexp: '.*cgroup_memory=1 cgroup_enable=memory.*'
+      state: absent
+    check_mode: yes
+    changed_when: no
+    register: cgroup_exists
+
+  - name: Configure /boot/cmdline.txt
+    shell: grep -q "$CGROUP" /boot/cmdline.txt || sudo sed -i -e "s/$/ $CGROUP/" /boot/cmdline.txt
+    environment:
+      CGROUP: "cgroup_memory=1 cgroup_enable=memory"
+    when: cgroup_exists.found == 0
+    notify:
+    - Reboot host
+    - Wait for host to reboot
+
+  - name: Flush handlers
+    meta: flush_handlers
